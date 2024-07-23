@@ -30,7 +30,7 @@
   background: #1f3540;
   font-size: 18px;
   color: #26ffcb;
-  margin: 25px 0 50px 0;
+  margin: 50px 0;
 }
 
 .boxes {
@@ -54,4 +54,11 @@
 
 .vanishing > img {
   opacity: 20%
+}
+
+.error-message {
+  color: red;
+  position: absolute;
+  left: 0%;
+  right: 0%;
 }
