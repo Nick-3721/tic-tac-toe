@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect  } from 'react'
 import './TicTacToe.css'
 import circleIcon from '../Assets/circle.png'
 import crossIcon from '../Assets/cross.png'
+import Confetti from "react-confetti"
 
 
 const TicTacToe = () => {
@@ -19,7 +20,11 @@ const TicTacToe = () => {
   let [X_turn, setX_Turn] = useState(true)
   const [X_Positions, setX_Positions] = useState([])
   const [O_Positions, setO_Positions] = useState([])
-  
+
+  let [winner, setWinner] = useState(null)
+  let [roundCounter, setRoundCounter] = useState(0)
+  let [gameCounter, setGameCounter] = useState(0)
+  let [scoreboard, setScoreboard] = useState({xScore: 0, oScore: 0})
   
   useEffect(() => {
     let timer
@@ -31,7 +36,7 @@ const TicTacToe = () => {
     return () => clearTimeout(timer)
   }, [errorMessage])
 
-  
+
   const handleTurn = (position) => {
     if (lock) { return }
     if (X_Positions.includes(position) || O_Positions.includes(position) ) { 
@@ -40,37 +45,39 @@ const TicTacToe = () => {
     }
 
     if (X_turn) {
-      const newX_Positions = [...X_Positions];
+      const newX_Positions = [...X_Positions]
       
       if (newX_Positions.length === 3) {
-        const removedXPosition = newX_Positions.shift();
+        const removedXPosition = newX_Positions.shift()
         newX_Positions.push(position);
         boxRefs.current[removedXPosition].current.innerHTML = ''
     } else {
-        newX_Positions.push(position);
+        newX_Positions.push(position)
       }
-      setX_Positions(newX_Positions);
+      setX_Positions(newX_Positions)
       
-      draw(newX_Positions, "X");  
+      draw(newX_Positions, "X")
       setX_Turn(false)
       if (checkWin(newX_Positions, "X")) setLock(true);
+      setRoundCounter(prevCount => prevCount +1)
     } 
 
     else {
-      const newO_Positions = [...O_Positions];
+      const newO_Positions = [...O_Positions]
       
       if (newO_Positions.length === 3) {
-        const removedOPosition = newO_Positions.shift();
-        newO_Positions.push(position);
+        const removedOPosition = newO_Positions.shift()
+        newO_Positions.push(position)
         boxRefs.current[removedOPosition].current.innerHTML = ''
     } else { 
-        newO_Positions.push(position);
+        newO_Positions.push(position)
       }
-      setO_Positions(newO_Positions);
+      setO_Positions(newO_Positions)
 
-      draw(newO_Positions, "O");  
+      draw(newO_Positions, "O")
       setX_Turn(true)
-      if (checkWin(newO_Positions, "O")) setLock(true);
+      if (checkWin(newO_Positions, "O")) setLock(true)
+      setRoundCounter(prevCount => prevCount +1)
     }
   }
   
@@ -93,14 +100,13 @@ const TicTacToe = () => {
     }
   }
 
+  useEffect(() => {
+    console.log(`X positions are: ${X_Positions}`)
+  }, [X_Positions])
 
   useEffect(() => {
-    console.log(`X positions are: ${X_Positions}`);
-  }, [X_Positions]);
-
-  useEffect(() => {
-    console.log(`Y positions are: ${O_Positions}`);
-  }, [O_Positions]);
+    console.log(`Y positions are: ${O_Positions}`)
+  }, [O_Positions])
 
 
 
@@ -108,26 +114,22 @@ const TicTacToe = () => {
   const checkWin = (positions, currentPlayer) => {
     const hasWon = winningCombinations.some(combination =>
       combination.every(index => positions.includes(index))
-    );
+    )
   
     if (hasWon) {
-      alert(`${currentPlayer} wins!`);
       setLock(true);
+      setWinner(currentPlayer)
+      
+      currentPlayer === "X" 
+        ? setScoreboard((prevScore) => ({ ...prevScore, xScore: prevScore.xScore + 1 }))
+        : setScoreboard((prevScore) => ({ ...prevScore, oScore: prevScore.oScore + 1 }))
+        
+        setGameCounter(prevCount => prevCount + 1)
     }
   
     return hasWon;
   };
  
-
-  const resetHandleClicky = () => {
-    setLock(false)
-    data = ["","","","","","","","",""];
-    titleRef.current.innerHTML = 'Tic tac Toe Game in <span>&nbsp;React</span>'
-
-    boxArray.map((e) => {
-      e.current.innerHTML = ''
-    })
-  }
 
    const resetHandleClick = () => {
     setLock(false)
@@ -135,10 +137,36 @@ const TicTacToe = () => {
     setO_Positions([])
     draw([], "X")
     draw([], "O")
+    setRoundCounter(0)
+    winner === "X" ? setX_Turn(true) : setX_Turn(false)
+
+    setWinner(null)
    }
  
   return (
-    <>
+    <main>
+    {winner && <Confetti />}
+      {!winner && <h1>Tri-Tac-Toe</h1>}
+      {winner === "X" && <h1 className='x-winner'>X has won the game</h1>}
+      {winner === "O" && <h1 className='o-winner'>O has won the game</h1>}
+
+    {/* <h1>
+      {!winner && "Tri-Tac-Toe"}
+      {winner === "X" && <span className='x-winner'>X has won the game</span>}
+      {winner === "O" && <span className='o-winner'>O has won the game</span>}
+    </h1> */}
+
+
+    <div className="game-info">
+      <div className="counter-wrapper">
+        {<p>Round: {roundCounter}</p>}
+        {<p>Game: {gameCounter}</p>}
+      </div>
+      <div className="score-wrapper">
+        <p>{` X score: ${scoreboard.xScore}`}</p>
+        <p>{` O score: ${scoreboard.oScore}`}</p>
+      </div>
+    </div>
       <div className="board">
         {Array.from({ length: 9 }).map((_, index) => (
           <div
@@ -151,8 +179,7 @@ const TicTacToe = () => {
       </div>
       {errorMessage && <p className="error-message">This position is already in use</p>}
       <button className='reset' onClick={()=>{resetHandleClick()}}>Reset</button>
-
-    </>
+    </main>
   )
 }
 

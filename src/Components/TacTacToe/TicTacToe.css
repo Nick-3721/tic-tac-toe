@@ -62,3 +62,27 @@
   left: 0%;
   right: 0%;
 }
+
+.game-info {
+  display: flex;
+}
+
+.score-wrapper, .counter-wrapper {
+  display: flex;
+  gap: 20px;
+  opacity: 30%;
+}
+.score-wrapper{
+  margin-left: auto;
+}
+
+p {
+  margin: 10px 0;
+}
+
+.x-winner {
+  color: #FFC226;
+}
+.o-winner {
+  color: #25FFCC;
+}
