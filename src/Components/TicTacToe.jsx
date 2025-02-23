@@ -1,8 +1,11 @@
 import React, { useRef, useState, useEffect  } from 'react'
-import './TicTacToe.css'
+import '../assets/TicTacToe.css'
 import circleIcon from '../Assets/circle.png'
 import crossIcon from '../Assets/cross.png'
+import { ResetButton } from './ResetButton.styled'
+
 import Confetti from "react-confetti"
+
 
 
 const TicTacToe = () => {
@@ -25,7 +28,8 @@ const TicTacToe = () => {
   let [roundCounter, setRoundCounter] = useState(0)
   let [gameCounter, setGameCounter] = useState(0)
   let [scoreboard, setScoreboard] = useState({xScore: 0, oScore: 0})
-  
+
+
   useEffect(() => {
     let timer
     if (errorMessage === true) {
@@ -35,6 +39,23 @@ const TicTacToe = () => {
     }
     return () => clearTimeout(timer)
   }, [errorMessage])
+
+
+// this function is not working correctly, needs to be fixed
+  
+  const handleHover = (position) => {
+    let side = null
+    X_turn ? (side = "X") : (side = "O")
+    if (lock || X_Positions.includes(position) || O_Positions.includes(position))  { return }
+
+    console.log(position)
+
+      side === "X" 
+        ? boxRefs.current[position].current.innerHTML = `<img src='${crossIcon}' alt='X' class="potential-move" />`
+        : boxRefs.current[position].current.innerHTML = `<img src='${circleIcon}' alt='O' class="potential-move" />`;
+  }
+
+
 
 
   const handleTurn = (position) => {
@@ -109,7 +130,6 @@ const TicTacToe = () => {
   }, [O_Positions])
 
 
-
  
   const checkWin = (positions, currentPlayer) => {
     const hasWon = winningCombinations.some(combination =>
@@ -145,26 +165,28 @@ const TicTacToe = () => {
  
   return (
     <main>
-    {winner && <Confetti />}
-      {!winner && <h1>Tri-Tac-Toe</h1>}
-      {winner === "X" && <h1 className='x-winner'>X has won the game</h1>}
-      {winner === "O" && <h1 className='o-winner'>O has won the game</h1>}
+    {winner && <Confetti 
+      colors={ winner === "X" ? ['#FFC226'] : ['#25FFCC'] }
+    />}
 
-    {/* <h1>
+    {<h1>
       {!winner && "Tri-Tac-Toe"}
-      {winner === "X" && <span className='x-winner'>X has won the game</span>}
-      {winner === "O" && <span className='o-winner'>O has won the game</span>}
-    </h1> */}
+      {winner === "X" && <span className='X-colour'>X has won the game</span>}
+      {winner === "O" && <span className='O-colour'>O has won the game</span>}
+    </h1> }
 
 
     <div className="game-info">
       <div className="counter-wrapper">
-        {<p>Round: {roundCounter}</p>}
-        {<p>Game: {gameCounter}</p>}
+        <p>Round: {roundCounter}</p>
+        <p>Game: {gameCounter}</p>
       </div>
       <div className="score-wrapper">
-        <p>{` X score: ${scoreboard.xScore}`}</p>
-        <p>{` O score: ${scoreboard.oScore}`}</p>
+        <p className={X_turn ? "X-colour" : "O-colour"}>{`${X_turn ? "X" : "O"}'s turn`}</p>
+      </div>
+      <div className="score-wrapper">
+        <p className='X-colour'>{`X Wins: ${scoreboard.xScore}`}</p>
+        <p className='O-colour'>{`O Wins: ${scoreboard.oScore}`}</p>
       </div>
     </div>
       <div className="board">
@@ -174,11 +196,16 @@ const TicTacToe = () => {
             className="boxes"
             ref={boxRefs.current[index]}
             onClick={(e) => handleTurn(index)}
+            // onMouseOver={(e) => handleHover(index)}
           ></div>
         ))}
       </div>
       {errorMessage && <p className="error-message">This position is already in use</p>}
-      <button className='reset' onClick={()=>{resetHandleClick()}}>Reset</button>
+      < ResetButton
+        onClick={()=>{resetHandleClick()}}
+        winner={winner}
+      >{winner ? "New Game" : "Reset"}
+      </ResetButton>
     </main>
   )
 }
