@@ -1,11 +1,10 @@
 import React, { useRef, useState, useEffect  } from 'react'
-import '../assets/TicTacToe.css'
+import '../TicTacToe.css'
 import circleIcon from '../Assets/circle.png'
 import crossIcon from '../Assets/cross.png'
+import { GameInfo } from './GameInfo';
 import { ResetButton } from './ResetButton.styled'
-
 import Confetti from "react-confetti"
-
 
 
 const TicTacToe = () => {
@@ -40,22 +39,18 @@ const TicTacToe = () => {
     return () => clearTimeout(timer)
   }, [errorMessage])
 
-
-// this function is not working correctly, needs to be fixed
   
-  const handleHover = (position) => {
-    let side = null
-    X_turn ? (side = "X") : (side = "O")
+  const potentialPlacement = (position) => {
     if (lock || X_Positions.includes(position) || O_Positions.includes(position))  { return }
 
-    console.log(position)
-
-      side === "X" 
-        ? boxRefs.current[position].current.innerHTML = `<img src='${crossIcon}' alt='X' class="potential-move" />`
-        : boxRefs.current[position].current.innerHTML = `<img src='${circleIcon}' alt='O' class="potential-move" />`;
+    boxRefs.current[position].current.innerHTML = `<img src='${X_turn ? crossIcon : circleIcon}' alt='${X_turn ? "X" : "O"}' class="potential-move" />`;
   }
 
+  const removePotential = (position) => {
+    if (lock || X_Positions.includes(position) || O_Positions.includes(position))  { return }
 
+    boxRefs.current[position].current.innerHTML = ``
+  }
 
 
   const handleTurn = (position) => {
@@ -136,7 +131,7 @@ const TicTacToe = () => {
       combination.every(index => positions.includes(index))
     )
   
-    if (hasWon) {
+    if(hasWon) {
       setLock(true);
       setWinner(currentPlayer)
       
@@ -162,33 +157,29 @@ const TicTacToe = () => {
 
     setWinner(null)
    }
- 
+   console.log((`winner is: ${winner}`))
   return (
     <main>
-    {winner && <Confetti 
-      colors={ winner === "X" ? ['#FFC226'] : ['#25FFCC'] }
-    />}
-
-    {<h1>
-      {!winner && "Tri-Tac-Toe"}
-      {winner === "X" && <span className='X-colour'>X has won the game</span>}
-      {winner === "O" && <span className='O-colour'>O has won the game</span>}
-    </h1> }
+      {winner && (
+        <Confetti colors={winner === "X" ? ["#FFC226"] : ["#25FFCC"]} />
+      )}
 
 
-    <div className="game-info">
-      <div className="counter-wrapper">
-        <p>Round: {roundCounter}</p>
-        <p>Game: {gameCounter}</p>
-      </div>
-      <div className="score-wrapper">
-        <p className={X_turn ? "X-colour" : "O-colour"}>{`${X_turn ? "X" : "O"}'s turn`}</p>
-      </div>
-      <div className="score-wrapper">
-        <p className='X-colour'>{`X Wins: ${scoreboard.xScore}`}</p>
-        <p className='O-colour'>{`O Wins: ${scoreboard.oScore}`}</p>
-      </div>
-    </div>
+      <h1>
+        {winner ? (
+          <span className={`${winner}-colour`}>{winner} has won the game</span>
+        ) : (
+          "Tri-Tac-Toe"
+        )}
+      </h1>
+    
+
+      <GameInfo
+        roundCounter={roundCounter}
+        gameCounter={gameCounter}
+        X_turn={X_turn}
+        scoreboard={scoreboard}
+      />
       <div className="board">
         {Array.from({ length: 9 }).map((_, index) => (
           <div
@@ -196,18 +187,24 @@ const TicTacToe = () => {
             className="boxes"
             ref={boxRefs.current[index]}
             onClick={(e) => handleTurn(index)}
-            // onMouseOver={(e) => handleHover(index)}
+            onMouseEnter={(e) => potentialPlacement(index)}
+            onMouseLeave={(e) => removePotential(index)}
           ></div>
         ))}
       </div>
-      {errorMessage && <p className="error-message">This position is already in use</p>}
-      < ResetButton
-        onClick={()=>{resetHandleClick()}}
+      {errorMessage && (
+        <p className="error-message">This position is already in use</p>
+      )}
+      <ResetButton
+        onClick={() => {
+          resetHandleClick();
+        }}
         winner={winner}
-      >{winner ? "New Game" : "Reset"}
+      >
+        {winner ? "New Game" : "Reset"}
       </ResetButton>
     </main>
-  )
+  );
 }
 
 export default TicTacToe    
