@@ -10,6 +10,8 @@ import Confetti from "react-confetti"
 const TicTacToe = () => {
   const boxRefs = useRef(Array.from({ length: 9 }, () => React.createRef()));
   
+  const [board, setBoard] = useState(Array(9).fill(null))
+
   const winningCombinations = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],  // Rows
     [0, 3, 6], [1, 4, 7], [2, 5, 8],  // Columns
@@ -31,7 +33,7 @@ const TicTacToe = () => {
 
   useEffect(() => {
     let timer
-    if (errorMessage === true) {
+    if (errorMessage) {
       timer = setTimeout(() => {
         setErrorMessage(false)
       }, 2000)
@@ -54,9 +56,12 @@ const TicTacToe = () => {
 
 
   const handleTurn = (position) => {
-    if (lock) { return }
+    if (lock) { 
+      setErrorMessage(`The game has finished, ${winner} has won`)
+      return 
+    }
     if (X_Positions.includes(position) || O_Positions.includes(position) ) { 
-      setErrorMessage(true)
+      setErrorMessage("This position is already in use")
       return 
     }
 
@@ -124,8 +129,11 @@ const TicTacToe = () => {
     console.log(`Y positions are: ${O_Positions}`)
   }, [O_Positions])
 
+  useEffect(() => {
+    console.log(errorMessage)
+  }, [errorMessage])
 
- 
+
   const checkWin = (positions, currentPlayer) => {
     const hasWon = winningCombinations.some(combination =>
       combination.every(index => positions.includes(index))
@@ -154,16 +162,15 @@ const TicTacToe = () => {
     draw([], "O")
     setRoundCounter(0)
     winner === "X" ? setX_Turn(true) : setX_Turn(false)
-
+    setErrorMessage(false)
     setWinner(null)
    }
-   console.log((`winner is: ${winner}`))
+
   return (
     <main>
       {winner && (
         <Confetti colors={winner === "X" ? ["#FFC226"] : ["#25FFCC"]} />
       )}
-
 
       <h1>
         {winner ? (
@@ -173,7 +180,6 @@ const TicTacToe = () => {
         )}
       </h1>
     
-
       <GameInfo
         roundCounter={roundCounter}
         gameCounter={gameCounter}
@@ -193,7 +199,7 @@ const TicTacToe = () => {
         ))}
       </div>
       {errorMessage && (
-        <p className="error-message">This position is already in use</p>
+        <p className="error-message">{errorMessage}</p>
       )}
       <ResetButton
         onClick={() => {
