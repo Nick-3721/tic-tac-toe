@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect  } from 'react'
 import '../TicTacToe.css'
-import circleIcon from '../Assets/circle.png'
-import crossIcon from '../Assets/cross.png'
+import circleIcon from '../assets/circle.png'
+import crossIcon from '../assets/cross.png'
 import { GameInfo } from './GameInfo';
 import { ResetButton } from './ResetButton.styled'
 import Confetti from "react-confetti"
